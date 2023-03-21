@@ -68,7 +68,7 @@ test("when a review is successfully created with message", async () => {
   apiMocks.getReviews();
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", ghContext(), undefined, "Review body");
+  await approve("gh-tok", ghContext(), undefined, undefined, "Review body");
 
   expect(createReview.isDone()).toBe(true);
 });

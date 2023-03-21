@@ -9,8 +9,8 @@ export async function run() {
     await approve(
       token,
       github.context,
-      getRepository(),
       prNumber(),
+      getRepository(),
       reviewMessage || undefined
     );
   } catch (error) {
