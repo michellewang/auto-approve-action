@@ -9,6 +9,7 @@ export async function run() {
     await approve(
       token,
       github.context,
+      getRepository(),
       prNumber(),
       reviewMessage || undefined
     );
@@ -19,6 +20,27 @@ export async function run() {
       core.setFailed("Unknown error");
     }
   }
+}
+
+function getRepository(): { owner: string, repo: string } {
+
+  // modified from https://github.com/actions/checkout/blob/24cb9080177205b6e8c946b17badbe402adc938f/src/input-helper.ts#L21
+  const qualifiedRepository =
+    core.getInput('repository') ||
+    `${github.context.repo.owner}/${github.context.repo.repo}`
+  core.debug(`qualified repository = '${qualifiedRepository}'`)
+
+  const splitRepository = qualifiedRepository.split('/')
+  if (
+    splitRepository.length !== 2 ||
+    !splitRepository[0] ||
+    !splitRepository[1]
+  ) {
+    throw new Error(
+      `Invalid repository '${qualifiedRepository}'. Expected format {owner}/{repo}.`
+    )
+  }
+  return { owner: splitRepository[0], repo:  splitRepository[1] };
 }
 
 function prNumber(): number {

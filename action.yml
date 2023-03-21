@@ -4,6 +4,9 @@ branding:
   icon: 'check-circle'
   color: 'green'
 inputs:
+  repository:
+    default: ${{ github.repository }}
+    description: 'Repository name with owner'
   github-token:
     default: ${{ github.token }}
     description: 'The GITHUB_TOKEN secret'

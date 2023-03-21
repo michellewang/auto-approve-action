@@ -7,6 +7,7 @@ import { GitHub } from "@actions/github/lib/utils";
 export async function approve(
   token: string,
   context: Context,
+  repository: {owner: string, repo: string},
   prNumber?: number,
   reviewMessage?: string
 ) {
@@ -25,8 +26,7 @@ export async function approve(
   const client = github.getOctokit(token);
 
   try {
-    const { owner, repo } = context.repo;
-
+    const { owner, repo } = repository;
     core.info(`Fetching user, pull request information, and existing reviews`);
     const [login, { data: pr }, { data: reviews }] = await Promise.all([
       getLoginForToken(client),
@@ -64,7 +64,7 @@ export async function approve(
     );
     await client.rest.pulls.createReview({
       owner: context.repo.owner,
-      repo: context.repo.repo,
+      repo: repo,
       pull_number: prNumber,
       body: reviewMessage,
       event: "APPROVE",
