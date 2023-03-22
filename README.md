@@ -148,9 +148,9 @@ If you're using a [CODEOWNERS file](https://docs.github.com/en/github/creating-c
 
 Each major version corresponds to a branch (e.g. `v2`, `v3`). The latest major version (`v3` at the time of writing) is the repository's default branch. Releases are tagged with semver-style version numbers (e.g. `v1.2.3`).
 
-### Development
+### Notes
 
-From the instructions on [creating a GitHub Action using JavaScript](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action) (requires `npm`):
+From the instructions on [creating a GitHub Action using JavaScript](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action) (requires [Node.js](https://nodejs.org/en/download)):
 
 Initialize:
 ```shell
@@ -178,4 +178,4 @@ Compile:
 npm run build
 ```
 
-Make sure to commit the newly created `dist/index.js` and `dist/licenses.txt`.
+Make sure to commit the newly created `dist/index.js`.
