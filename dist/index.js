@@ -10349,14 +10349,11 @@ exports.approve = void 0;
 const core = __importStar(__nccwpck_require__(6024));
 const github = __importStar(__nccwpck_require__(5016));
 const request_error_1 = __nccwpck_require__(1042);
-function approve(token, context, prNumber, repository, reviewMessage) {
+function approve(token, context, owner, repo, prNumber, reviewMessage) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         if (!prNumber) {
             prNumber = (_a = context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
-        }
-        if (!repository) {
-            repository = context.repo;
         }
         if (!prNumber) {
             core.setFailed("Event payload missing `pull_request` key, and no `pull-request-number` provided as input." +
@@ -10365,7 +10362,6 @@ function approve(token, context, prNumber, repository, reviewMessage) {
         }
         const client = github.getOctokit(token);
         try {
-            const { owner, repo } = repository;
             core.info(`Fetching user, pull request information, and existing reviews`);
             const [login, { data: pr }, { data: reviews }] = yield Promise.all([
                 getLoginForToken(client),
@@ -10506,8 +10502,8 @@ function run() {
         try {
             const token = core.getInput("github-token");
             const reviewMessage = core.getInput("review-message");
-            const { prNumber, repository } = getInputs();
-            yield (0, approve_1.approve)(token, github.context, prNumber, repository, reviewMessage || undefined);
+            const { prNumber, owner, repo } = getInputs();
+            yield (0, approve_1.approve)(token, github.context, owner, repo, prNumber, reviewMessage || undefined);
         }
         catch (error) {
             if (error instanceof Error) {
@@ -10521,23 +10517,31 @@ function run() {
 }
 exports.run = run;
 function getInputs() {
-    var qualifiedRepository = core.getInput('repository');
-    if (qualifiedRepository) {
-        if (core.getInput("pull-request-number") !== "") {
+    const prNumber = getPrNumber();
+    var repository = core.getInput("repository");
+    if (repository !== "") {
+        if (core.getInput("pull-request-number") == "") {
             throw new Error("pull-request-number must be specified with repository input");
         }
+        var { owner, repo } = parseRepository(repository);
+        return { prNumber: prNumber, owner: owner, repo: repo };
     }
     else {
-        qualifiedRepository = `${github.context.repo.owner}/${github.context.repo.repo}`;
+        return {
+            prNumber: prNumber,
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+        };
     }
-    const splitRepository = qualifiedRepository.split('/');
+}
+function parseRepository(repository) {
+    const splitRepository = repository.split("/");
     if (splitRepository.length !== 2 ||
         !splitRepository[0] ||
         !splitRepository[1]) {
-        throw new Error(`Invalid repository '${qualifiedRepository}'. Expected format {owner}/{repo}.`);
+        throw new Error(`Invalid repository '${repository}'. Expected format {owner}/{repo}.`);
     }
-    const repository = { owner: splitRepository[0], repo: splitRepository[1] };
-    return { prNumber: getPrNumber(), repository: repository };
+    return { owner: splitRepository[0], repo: splitRepository[1] };
 }
 function getPrNumber() {
     if (core.getInput("pull-request-number") !== "") {
