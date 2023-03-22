@@ -10506,7 +10506,8 @@ function run() {
         try {
             const token = core.getInput("github-token");
             const reviewMessage = core.getInput("review-message");
-            yield (0, approve_1.approve)(token, github.context, prNumber(), getRepository(), reviewMessage || undefined);
+            const { prNumber, repository } = getInputs();
+            yield (0, approve_1.approve)(token, github.context, prNumber, repository, reviewMessage || undefined);
         }
         catch (error) {
             if (error instanceof Error) {
@@ -10519,20 +10520,26 @@ function run() {
     });
 }
 exports.run = run;
-function getRepository() {
-    // modified from https://github.com/actions/checkout/blob/24cb9080177205b6e8c946b17badbe402adc938f/src/input-helper.ts#L21
-    const qualifiedRepository = core.getInput('repository') ||
-        `${github.context.repo.owner}/${github.context.repo.repo}`;
-    core.debug(`qualified repository = '${qualifiedRepository}'`);
+function getInputs() {
+    var qualifiedRepository = core.getInput('repository');
+    if (qualifiedRepository) {
+        if (core.getInput("pull-request-number") !== "") {
+            throw new Error("pull-request-number must be specified with repository input");
+        }
+    }
+    else {
+        qualifiedRepository = `${github.context.repo.owner}/${github.context.repo.repo}`;
+    }
     const splitRepository = qualifiedRepository.split('/');
     if (splitRepository.length !== 2 ||
         !splitRepository[0] ||
         !splitRepository[1]) {
         throw new Error(`Invalid repository '${qualifiedRepository}'. Expected format {owner}/{repo}.`);
     }
-    return { owner: splitRepository[0], repo: splitRepository[1] };
+    const repository = { owner: splitRepository[0], repo: splitRepository[1] };
+    return { prNumber: getPrNumber(), repository: repository };
 }
-function prNumber() {
+function getPrNumber() {
     if (core.getInput("pull-request-number") !== "") {
         const prNumber = parseInt(core.getInput("pull-request-number"), 10);
         if (Number.isNaN(prNumber)) {
