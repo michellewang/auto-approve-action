@@ -72,7 +72,33 @@ test("calls approve when a valid PR number is provided", async () => {
   );
 });
 
+test("calls approve when repository is provided", async () => {
+  process.env["INPUT_PULL-REQUEST-NUMBER"] = "456";
+  process.env["INPUT_REPOSITORY"] = "owner/repo";
+  await run();
+  expect(mockedApprove).toHaveBeenCalledWith(
+    "tok-xyz",
+    expect.anything(),
+    456,
+    { owner: "owner", repo: "repo" },
+    undefined
+  );
+});
+
 test("errors when an invalid PR number is provided", async () => {
+  process.env["INPUT_PULL-REQUEST-NUMBER"] = "not a number";
+  await run();
+  expect(mockedApprove).not.toHaveBeenCalled();
+});
+
+test("errors when repo is provided without a PR number", async () => {
+  process.env["INPUT_REPOSITORY"] = "owner/repo";
+  await run();
+  expect(mockedApprove).not.toHaveBeenCalled();
+});
+
+test("errors when repo is provided without a valid PR number", async () => {
+  process.env["INPUT_REPOSITORY"] = "owner/repo";
   process.env["INPUT_PULL-REQUEST-NUMBER"] = "not a number";
   await run();
   expect(mockedApprove).not.toHaveBeenCalled();
