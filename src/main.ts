@@ -28,8 +28,8 @@ function getInputs(): {
   repository: { owner: string; repo: string };
 } {
   var qualifiedRepository = core.getInput("repository");
-  if (qualifiedRepository) {
-    if (core.getInput("pull-request-number") !== "") {
+  if (qualifiedRepository !== "") {
+    if (core.getInput("pull-request-number") == "") {
       throw new Error(
         "pull-request-number must be specified with repository input"
       );
