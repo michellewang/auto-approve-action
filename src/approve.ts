@@ -8,7 +8,7 @@ export async function approve(
   token: string,
   context: Context,
   prNumber?: number,
-  repository?: {owner: string, repo: string},
+  repository?: { owner: string; repo: string },
   reviewMessage?: string
 ) {
   if (!prNumber) {

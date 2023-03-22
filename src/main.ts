@@ -23,17 +23,22 @@ export async function run() {
   }
 }
 
-function getInputs(): { prNumber: number, repository: { owner: string, repo: string } } {
-  var qualifiedRepository = core.getInput('repository');
+function getInputs(): {
+  prNumber: number;
+  repository: { owner: string; repo: string };
+} {
+  var qualifiedRepository = core.getInput("repository");
   if (qualifiedRepository) {
     if (core.getInput("pull-request-number") !== "") {
-      throw new Error("pull-request-number must be specified with repository input")
+      throw new Error(
+        "pull-request-number must be specified with repository input"
+      );
     }
   } else {
     qualifiedRepository = `${github.context.repo.owner}/${github.context.repo.repo}`;
   }
 
-  const splitRepository = qualifiedRepository.split('/');
+  const splitRepository = qualifiedRepository.split("/");
   if (
     splitRepository.length !== 2 ||
     !splitRepository[0] ||
@@ -41,9 +46,9 @@ function getInputs(): { prNumber: number, repository: { owner: string, repo: str
   ) {
     throw new Error(
       `Invalid repository '${qualifiedRepository}'. Expected format {owner}/{repo}.`
-    )
+    );
   }
-  const repository = { owner: splitRepository[0], repo:  splitRepository[1] };
+  const repository = { owner: splitRepository[0], repo: splitRepository[1] };
   return { prNumber: getPrNumber(), repository: repository };
 }
 
