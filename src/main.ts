@@ -6,12 +6,13 @@ export async function run() {
   try {
     const token = core.getInput("github-token");
     const reviewMessage = core.getInput("review-message");
-    const { prNumber, repository } = getInputs();
+    const { prNumber, owner, repo } = getInputs();
     await approve(
       token,
       github.context,
+      owner,
+      repo,
       prNumber,
-      repository,
       reviewMessage || undefined
     );
   } catch (error) {
@@ -23,33 +24,38 @@ export async function run() {
   }
 }
 
-function getInputs(): {
-  prNumber: number;
-  repository: { owner: string; repo: string };
-} {
-  var qualifiedRepository = core.getInput("repository");
-  if (qualifiedRepository !== "") {
+function getInputs(): { prNumber: number; owner: string; repo: string } {
+  const prNumber = getPrNumber();
+  var repository = core.getInput("repository");
+  if (repository !== "") {
     if (core.getInput("pull-request-number") == "") {
       throw new Error(
         "pull-request-number must be specified with repository input"
       );
     }
+    var { owner, repo } = parseRepository(repository);
+    return { prNumber: prNumber, owner: owner, repo: repo };
   } else {
-    qualifiedRepository = `${github.context.repo.owner}/${github.context.repo.repo}`;
+    return {
+      prNumber: prNumber,
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+    };
   }
+}
 
-  const splitRepository = qualifiedRepository.split("/");
+function parseRepository(repository: string): { owner: string; repo: string } {
+  const splitRepository = repository.split("/");
   if (
     splitRepository.length !== 2 ||
     !splitRepository[0] ||
     !splitRepository[1]
   ) {
     throw new Error(
-      `Invalid repository '${qualifiedRepository}'. Expected format {owner}/{repo}.`
+      `Invalid repository '${repository}'. Expected format {owner}/{repo}.`
     );
   }
-  const repository = { owner: splitRepository[0], repo: splitRepository[1] };
-  return { prNumber: getPrNumber(), repository: repository };
+  return { owner: splitRepository[0], repo: splitRepository[1] };
 }
 
 function getPrNumber(): number {

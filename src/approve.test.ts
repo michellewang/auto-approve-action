@@ -46,7 +46,7 @@ test("a review is successfully created with a PAT", async () => {
   apiMocks.getReviews();
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -57,7 +57,7 @@ test("a review is successfully created with an Actions token", async () => {
   apiMocks.getReviews();
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -68,7 +68,14 @@ test("when a review is successfully created with message", async () => {
   apiMocks.getReviews();
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", ghContext(), undefined, undefined, "Review body");
+  await approve(
+    "gh-tok",
+    ghContext(),
+    "hmarr",
+    "test",
+    undefined,
+    "Review body"
+  );
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -84,7 +91,7 @@ test("when a review is successfully created using pull-request-number", async ()
     .post("/repos/hmarr/test/pulls/102/reviews")
     .reply(200, { id: 1 });
 
-  await approve("gh-tok", new Context(), 102);
+  await approve("gh-tok", new Context(), "hmarr", "test", 102);
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -101,7 +108,7 @@ test("when a review has already been approved by current user", async () => {
   ]);
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(createReview.isDone()).toBe(false);
   expect(core.info).toHaveBeenCalledWith(
@@ -123,7 +130,7 @@ test("when a review is pending", async () => {
   ]);
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", new Context(), 101);
+  await approve("gh-tok", new Context(), "hmarr", "test", 101);
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -140,7 +147,7 @@ test("when a review is dismissed", async () => {
   ]);
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", new Context(), 101);
+  await approve("gh-tok", new Context(), "hmarr", "test", 101);
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -162,7 +169,7 @@ test("when a review is dismissed, but an earlier review is approved", async () =
   ]);
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", new Context(), 101);
+  await approve("gh-tok", new Context(), "hmarr", "test", 101);
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -179,7 +186,7 @@ test("when a review is not approved", async () => {
   ]);
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", new Context(), 101);
+  await approve("gh-tok", new Context(), "hmarr", "test", 101);
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -196,7 +203,7 @@ test("when a review is commented", async () => {
   ]);
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", new Context(), 101);
+  await approve("gh-tok", new Context(), "hmarr", "test", 101);
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -213,7 +220,7 @@ test("when a review has already been approved by another user", async () => {
   ]);
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", new Context(), 101);
+  await approve("gh-tok", new Context(), "hmarr", "test", 101);
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -230,7 +237,7 @@ test("when a review has already been approved by unknown user", async () => {
   ]);
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", new Context(), 101);
+  await approve("gh-tok", new Context(), "hmarr", "test", 101);
 
   expect(createReview.isDone()).toBe(true);
 });
@@ -251,14 +258,14 @@ test("when a review has been previously approved by user and but requests a re-r
 
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", new Context(), 101);
+  await approve("gh-tok", new Context(), "hmarr", "test", 101);
 
   expect(createReview.isDone()).toBe(true);
 });
 
 test("without a pull request", async () => {
   const createReview = apiMocks.createReview();
-  await approve("gh-tok", new Context());
+  await approve("gh-tok", new Context(), "hmarr", "test");
 
   expect(createReview.isDone()).toBe(false);
   expect(core.setFailed).toHaveBeenCalledWith(
@@ -272,7 +279,7 @@ test("when the token is invalid", async () => {
   apiMocks.getReviews(401, { message: "Bad credentials" });
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(createReview.isDone()).toBe(false);
   expect(core.setFailed).toHaveBeenCalledWith(
@@ -288,7 +295,7 @@ test("when the token doesn't have write permissions", async () => {
     .post("/repos/hmarr/test/pulls/101/reviews")
     .reply(403, { message: "Resource not accessible by integration" });
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(core.setFailed).toHaveBeenCalledWith(
     expect.stringContaining("pull_request_target")
@@ -303,7 +310,7 @@ test("when a user tries to approve their own pull request", async () => {
     .post("/repos/hmarr/test/pulls/101/reviews")
     .reply(422, { message: "Unprocessable Entity" });
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(core.setFailed).toHaveBeenCalledWith(
     expect.stringContaining("same user account")
@@ -316,7 +323,7 @@ test("when pull request does not exist or the token doesn't have access", async 
   apiMocks.getReviews(404, { message: "Not Found" });
   const createReview = apiMocks.createReview();
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(createReview.isDone()).toBe(false);
   expect(core.setFailed).toHaveBeenCalledWith(
@@ -332,7 +339,7 @@ test("when the token is read-only", async () => {
     .post("/repos/hmarr/test/pulls/101/reviews")
     .reply(403, { message: "Not Authorized" });
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(core.setFailed).toHaveBeenCalledWith(
     expect.stringContaining("are read-only")
@@ -347,7 +354,7 @@ test("when the token doesn't have write access to the repository", async () => {
     .post("/repos/hmarr/test/pulls/101/reviews")
     .reply(404, { message: "Not Found" });
 
-  await approve("gh-tok", ghContext());
+  await approve("gh-tok", ghContext(), "hmarr", "test");
 
   expect(core.setFailed).toHaveBeenCalledWith(
     expect.stringContaining("doesn't have access")

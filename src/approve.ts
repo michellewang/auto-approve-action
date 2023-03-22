@@ -7,17 +7,14 @@ import { GitHub } from "@actions/github/lib/utils";
 export async function approve(
   token: string,
   context: Context,
+  owner: string,
+  repo: string,
   prNumber?: number,
-  repository?: { owner: string; repo: string },
   reviewMessage?: string
 ) {
   if (!prNumber) {
     prNumber = context.payload.pull_request?.number;
   }
-  if (!repository) {
-    repository = context.repo;
-  }
-
   if (!prNumber) {
     core.setFailed(
       "Event payload missing `pull_request` key, and no `pull-request-number` provided as input." +
@@ -29,8 +26,6 @@ export async function approve(
   const client = github.getOctokit(token);
 
   try {
-    const { owner, repo } = repository;
-
     core.info(`Fetching user, pull request information, and existing reviews`);
     const [login, { data: pr }, { data: reviews }] = await Promise.all([
       getLoginForToken(client),
