@@ -148,7 +148,7 @@ If you're using a [CODEOWNERS file](https://docs.github.com/en/github/creating-c
 
 Each major version corresponds to a branch (e.g. `v2`, `v3`). The latest major version (`v3` at the time of writing) is the repository's default branch. Releases are tagged with semver-style version numbers (e.g. `v1.2.3`).
 
-## How to build
+### Development
 
 From the instructions on [creating a GitHub Action using JavaScript](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action) (requires `npm`):
 
@@ -163,14 +163,19 @@ npm install @actions/core
 npm install @actions/github
 ```
 
-Install `vercel/ncc`, a tool for compiling the code/modules in one file for distribution:
+Run tests:
 ```shell
-npm install -g @vercel/ncc
+npm test
+```
+
+Run linter:
+```shell
+npx prettier --write **/*.ts
 ```
 
 Compile:
 ```shell
-ncc build src/main.ts --license licenses.txt
+npm run build
 ```
 
 Make sure to commit the newly created `dist/index.js` and `dist/licenses.txt`.
