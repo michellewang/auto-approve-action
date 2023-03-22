@@ -43,6 +43,7 @@ test("passes the review message to approve", async () => {
     "tok-xyz",
     expect.anything(),
     101,
+    expect.anything(),
     "LGTM"
   );
 });
@@ -54,6 +55,7 @@ test("calls approve when no PR number is provided", async () => {
     "tok-xyz",
     expect.anything(),
     101,
+    expect.anything(),
     undefined
   );
 });
@@ -65,6 +67,7 @@ test("calls approve when a valid PR number is provided", async () => {
     "tok-xyz",
     expect.anything(),
     456,
+    expect.anything(),
     undefined
   );
 });
